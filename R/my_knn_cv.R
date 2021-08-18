@@ -18,7 +18,7 @@
 #    of the misclassification errors calculated in each fold).
 #'
 #' @examples
-#' train <- rbind(iris3[1:25,,1], iris3[1:25,,2], iris3[1:25,,3])
+#' train <- as.data.frame(rbind(iris3[1:25,,1], iris3[1:25,,2], iris3[1:25,,3]))
 #' cl <- factor(c(rep("s",25), rep("c",25), rep("v",25)))
 #' my_knn_cv(train, cl, k_nn = 1, k_cv = 5, feedback = FALSE)
 #' my_knn_cv(train, cl, k_nn = 1, k_cv = 5)
@@ -44,6 +44,7 @@ my_knn_cv <- function(train, cl, k_nn = 1, k_cv = 5, feedback = FALSE) {
   # Generate numbers between 1 and the fold count (k_cv) to represent
   # folds to draw from and randomly mix them up.
   fold <- sample(rep(1:k_cv, length = length(cl)))
+  train$fold <- fold
 
   # Store the predicted classifications and using the same
   # factors specified by the known classifications.
@@ -58,19 +59,19 @@ my_knn_cv <- function(train, cl, k_nn = 1, k_cv = 5, feedback = FALSE) {
   # Run nearest neighbor algorithm for each fold.
   for (i in 1:k_cv) {
     # Use data rows not associated with the current fold for training.
-    data_train <- train %>% filter(fold != i)
+    data_train <- train %>% dplyr::filter(fold != i)
     # Use data rows associated with the current fold for testing.
-    data_test <- train %>% filter(fold == i)
+    data_test <- train %>% dplyr::filter(fold == i)
     # Use classifications not associated with the current fold for training.
     classification_train <- cl[fold != i]
     # Use classifications associated with the current fold for testing.
     classification_test <- cl[fold == i]
 
     # Run nearest neighbor classification.
-    nn_result <- knn(train = data_train,
-                     test = data_test,
-                     cl = classification_train,
-                     k = k_nn)
+    nn_result <- class::knn(train = data_train,
+                            test = data_test,
+                            cl = classification_train,
+                            k = k_nn)
 
     # Record iterative misclassification error.
     misclassification_errors[i] <- mean(classification_test != nn_result)
@@ -88,7 +89,7 @@ my_knn_cv <- function(train, cl, k_nn = 1, k_cv = 5, feedback = FALSE) {
   error_cumulative <- mean(cl != predictions)
 
   # Use full data for both the training and test data.
-  nn_result <- knn(train = train, test = train, cl = cl, k = k_nn)
+  nn_result <- class::knn(train = train, test = train, cl = cl, k = k_nn)
 
   if (feedback) {
     cat("iterative misclassification_errors:", misclassification_errors, "\n")

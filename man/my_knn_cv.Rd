@@ -27,7 +27,7 @@ cross-validation misclassification error calculated by taking the mean
 This function applies cross-validation to a nearest neighbor algorithm.
 }
 \examples{
-train <- rbind(iris3[1:25,,1], iris3[1:25,,2], iris3[1:25,,3])
+train <- as.data.frame(rbind(iris3[1:25,,1], iris3[1:25,,2], iris3[1:25,,3]))
 cl <- factor(c(rep("s",25), rep("c",25), rep("v",25)))
 my_knn_cv(train, cl, k_nn = 1, k_cv = 5, feedback = FALSE)
 my_knn_cv(train, cl, k_nn = 1, k_cv = 5)

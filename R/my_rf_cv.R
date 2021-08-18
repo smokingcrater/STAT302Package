@@ -27,9 +27,9 @@ my_rf_cv <- function(k = 5, feedback = FALSE) {
   # Subset columns (classification = y = body_mass_g, covariates = x =
   # bill_length_mm, bill_depth_mm, and flipper_length_mm and eliminate NAs.
   clean_penguins <-
-    penguins %>%
-    select(body_mass_g, bill_length_mm, bill_depth_mm, flipper_length_mm) %>%
-    na.omit()
+    STAT302Package::my_penguins %>%
+    dplyr::select(body_mass_g, bill_length_mm, bill_depth_mm, flipper_length_mm) %>%
+    stats::na.omit()
 
   # Generate numbers between 1 and the fold count (k) to represent
   # folds to draw from and randomly mix them up.
@@ -44,9 +44,9 @@ my_rf_cv <- function(k = 5, feedback = FALSE) {
   # Run random forest algorithm for each fold.
   for (i in 1:k) {
     # Use data rows not associated with the current fold for training.
-    data_train <- clean_penguins %>% filter(fold != i)
+    data_train <- clean_penguins %>% dplyr::filter(fold != i)
     # Use data rows associated with the current fold for testing.
-    data_test <- clean_penguins %>% filter(fold == i)
+    data_test <- clean_penguins %>% dplyr::filter(fold == i)
     # Use data rows associated with the current fold for true body_mass_g.
     body_mass_g_true <- clean_penguins$body_mass_g[fold == i]
 
@@ -54,12 +54,14 @@ my_rf_cv <- function(k = 5, feedback = FALSE) {
     # w/100 trees to predict body_mass_g using covariates bill_length_mm,
     # bill_depth_mm, and flipper_length_mm.
     rf_model <-
-      randomForest(body_mass_g ~
-                     bill_length_mm + bill_depth_mm + flipper_length_mm,
-                   data = data_train,
-                   ntree = 100)
+      randomForest::randomForest(body_mass_g ~
+                                   bill_length_mm +
+                                   bill_depth_mm +
+                                   flipper_length_mm,
+                                 data = data_train,
+                                 ntree = 100)
     # Predict the body_mass_g of this fold.
-    prediction <- predict(rf_model, data_test[, -1])
+    prediction <- stats::predict(rf_model, data_test[, -1])
 
     # Calculate and save the mean squared error as the mean of the square of
     # all of the differences between the predicted value and the truth value
@@ -88,3 +90,5 @@ my_rf_cv <- function(k = 5, feedback = FALSE) {
 
   return(mean_squared_error_iterative)
 }
+
+utils::globalVariables(c("bill_length_mm", "bill_depth_mm", "body_mass_g", "flipper_length_mm"))

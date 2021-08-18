@@ -33,11 +33,11 @@ my_lm <- function(formula, data, pp = 0) {
   }
 
   # Extract the model matrix X.
-  my_x <- model.matrix(formula, data)
+  my_x <- stats::model.matrix(formula, data)
   # Extract the model frame object (required below by Y).
-  my_frame <- model.frame(formula, data)
+  my_frame <- stats::model.frame(formula, data)
   # Extract a model frame object.
-  my_y <- model.response(my_frame)
+  my_y <- stats::model.response(my_frame)
 
   # Solve for linear regression coefficients.
   my_coefficients <- solve(t(my_x) %*% my_x) %*% t(my_x) %*% my_y
