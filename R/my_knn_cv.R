@@ -40,6 +40,9 @@ my_knn_cv <- function(train, cl, k_nn = 1, k_cv = 5, feedback = FALSE) {
   if (!is.numeric(k_cv)) {
     stop("input k_cv must be a number of cross validation folds")
   }
+  if (!is.logical(feedback)) {
+    stop("input feedback must be a Boolean")
+  }
 
   # Generate numbers between 1 and the fold count (k_cv) to represent
   # folds to draw from and randomly mix them up.

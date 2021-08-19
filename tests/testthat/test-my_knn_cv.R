@@ -1,3 +1,32 @@
-test_that("multiplication works", {
-  expect_equal(2 * 2, 4)
+test_that("my_knn_cv() invalid input for parameter train throws error", {
+  cl <- factor(c(rep("s",25), rep("c",25), rep("v",25)))
+  expect_error(my_knn_cv("one", cl))
+  expect_error(my_knn_cv(1, cl, k_nn = 1))
+  expect_error(my_knn_cv(c("one", "two"), cl, k_nn = 1, k_cv = 5))
+  expect_error(my_knn_cv(c(1, 2), cl, k_nn = 1, k_cv = 5, feedback = FALSE))
+})
+test_that("my_knn_cv() invalid input for parameter cl throws error", {
+  train <- as.data.frame(rbind(iris3[1:25,,1], iris3[1:25,,2], iris3[1:25,,3]))
+  expect_error(my_knn_cv(train, "one"))
+  expect_error(my_knn_cv(train, 1, k_nn = 1))
+  expect_error(my_knn_cv(train, c("one", "two"), k_nn = 1, k_cv = 5))
+  expect_error(my_knn_cv(train, c(1, 2), k_nn = 1, k_cv = 5, feedback = FALSE))
+})
+test_that("my_knn_cv() invalid input for parameter k_nn throws error", {
+  train <- as.data.frame(rbind(iris3[1:25,,1], iris3[1:25,,2], iris3[1:25,,3]))
+  cl <- factor(c(rep("s",25), rep("c",25), rep("v",25)))
+  expect_error(my_knn_cv(train, cl, k_nn = "1"))
+  expect_error(my_knn_cv(train, cl, k_nn = c("one", "two"), k_cv = 5))
+  expect_error(my_knn_cv(train, cl, k_nn = FALSE, k_cv = 5, feedback = FALSE))
+})
+test_that("my_knn_cv() invalid input for parameter k_cv throws error", {
+  train <- as.data.frame(rbind(iris3[1:25,,1], iris3[1:25,,2], iris3[1:25,,3]))
+  cl <- factor(c(rep("s",25), rep("c",25), rep("v",25)))
+  expect_error(my_knn_cv(train, cl, k_nn = 1, k_cv = "5"))
+  expect_error(my_knn_cv(train, cl, k_nn = 1, k_cv = FALSE, feedback = FALSE))
+})
+test_that("my_knn_cv() invalid input for parameter feedback throws error", {
+  train <- as.data.frame(rbind(iris3[1:25,,1], iris3[1:25,,2], iris3[1:25,,3]))
+  cl <- factor(c(rep("s",25), rep("c",25), rep("v",25)))
+  expect_error(my_knn_cv(train, cl, k_nn = 1, k_cv = FALSE, feedback = "FALSE"))
 })

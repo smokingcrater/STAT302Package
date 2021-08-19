@@ -1,4 +1,6 @@
 test_that("my_t.test() non-numeric input for parameter x or mu throws error", {
+  set.seed(666)
+  testdata <- rnorm(100, mean = 0, sd = 1)
   expect_error(my_t.test("one"))
   expect_error(my_t.test(c("one", "two")))
   expect_error(my_t.test(testdata, mu = "zero"))
