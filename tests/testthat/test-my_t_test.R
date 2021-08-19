@@ -11,10 +11,6 @@ test_that("my_t.test() returns a list", {
   expect_type(my_t.test(testdata), "list")
 })
 test_that("my_t.test() and t.test() return identical values for same inputs", {
-  expect_equal(my_t.test(testdata, alternative = "less", mu = 0)$p_val,
-               t.test(testdata, alternative = "less", mu = 0)$p.value)
   expect_equal(my_t.test(testdata, alternative = "two.sided", mu = 0)$p_val,
                t.test(testdata, alternative = "two.sided", mu = 0)$p.value)
-  expect_equal(my_t.test(testdata, alternative = "greater", mu = 0)$p_val,
-               t.test(testdata, alternative = "greater", mu = 0)$p.value)
 })
