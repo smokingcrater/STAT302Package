@@ -1,3 +1,12 @@
-test_that("multiplication works", {
-  expect_equal(2 * 2, 4)
+test_that("my_rf_cv() invalid input for parameter k throws error", {
+  expect_error(my_rf_cv("five"))
+  expect_error(my_rf_cv(TRUE, feedback = FALSE))
 })
+test_that("my_rf_cv() invalid input for parameter feedback throws error", {
+  expect_error(my_rf_cv(feedback = "FALSE"))
+  expect_error(my_rf_cv(5, feedback = "TRUE"))
+})
+test_that("my_rf_cv() returns a double", {
+  expect_type(my_rf_cv(k = 5, feedback = FALSE), "double")
+})
+

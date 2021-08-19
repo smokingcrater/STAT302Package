@@ -23,6 +23,9 @@ my_rf_cv <- function(k = 5, feedback = FALSE) {
   if (!is.numeric(k)) {
     stop("input k must be a number of cross validation folds")
   }
+  if (!is.logical(feedback)) {
+    stop("input feedback must be a Boolean")
+  }
 
   # Subset columns (classification = y = body_mass_g, covariates = x =
   # bill_length_mm, bill_depth_mm, and flipper_length_mm and eliminate NAs.
