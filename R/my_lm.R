@@ -61,7 +61,7 @@ my_lm <- function(formula, data, pp = 0) {
   my_t <- my_coefficients / my_se
 
   # Calculate two-sided p-value.
-  my_p <- pt(abs(my_t), df = my_df, lower.tail = FALSE) * 2
+  my_p <- stats::pt(abs(my_t), df = my_df, lower.tail = FALSE) * 2
 
   # Package the outputs in a table.
   my_result <- as.table(cbind(my_coefficients, my_se, my_t, my_p))

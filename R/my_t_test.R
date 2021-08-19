@@ -52,11 +52,11 @@ my_t.test <- function(x, alternative = "two.sided", mu = 0) {
 
   # Determine the p-value associated with the test statistic.
   if  (identical(alternative, "two.sided")) {
-    my_p <- pt(abs(my_t), df = my_df, lower.tail = FALSE) * 2
+    my_p <- stats::pt(abs(my_t), df = my_df, lower.tail = FALSE) * 2
   } else if (identical(alternative, "less")) {
-    my_p <- pt(abs(my_t), df = my_df, lower.tail = TRUE)
+    my_p <- stats::pt(abs(my_t), df = my_df, lower.tail = FALSE)
   } else if (identical(alternative, "greater")) {
-    my_p <- pt(abs(my_t), df = my_df, lower.tail = FALSE)
+    my_p <- stats::pt(abs(my_t), df = my_df, lower.tail = TRUE)
   }
 
   # Save test statistic, degrees of freedom, alternative hypothesis, and
