@@ -36,4 +36,10 @@ test_that("my_knn_cv() returns a list", {
   expect_type(my_knn_cv(train, cl, k_nn = 1, k_cv = 5, feedback = FALSE),
               "list")
 })
-
+test_that("my_knn_cv() no message for parameter feedback throws error", {
+  train <- as.data.frame(rbind(iris3[1:25,,1], iris3[1:25,,2], iris3[1:25,,3]))
+  cl <- factor(c(rep("s",25), rep("c",25), rep("v",25)))
+  expect_output(my_knn_cv(train, cl, feedback = TRUE))
+  expect_output(my_knn_cv(train, cl, k_nn = 1, feedback = TRUE))
+  expect_output(my_knn_cv(train, cl, k_nn = 1, k_cv = 5, feedback = TRUE))
+})
