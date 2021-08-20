@@ -29,7 +29,5 @@ my_t.test(rnorm(100, mean = 0, sd = 1), alternative = "greater")
 my_t.test(rnorm(100, mean = 0, sd = 1))
 
 }
-\keyword{inference,}
-\keyword{statistical}
+\keyword{inference}
 \keyword{t-test}
-\keyword{test,}

@@ -28,4 +28,5 @@ my_lm(mpg ~ hp + wt, data = mtcars, pp = 5)
 my_lm(mpg ~ hp + wt, data = mtcars)
 
 }
-\keyword{regression}
+\keyword{inference}
+\keyword{prediction}

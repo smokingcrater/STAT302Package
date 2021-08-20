@@ -6,7 +6,7 @@
 #' @param alternative String specifying the alternative hypothesis, can be
 #'   one of three values: less, two.sided, or greater.
 #' @param mu The numeric mean of the null hypothesis.
-#' @keywords inference, statistical test, t-test
+#' @keywords inference t-test
 #'
 #' @importFrom stats pt sd
 #'
@@ -54,9 +54,9 @@ my_t.test <- function(x, alternative = "two.sided", mu = 0) {
   if  (identical(alternative, "two.sided")) {
     my_p <- stats::pt(abs(my_t), df = my_df, lower.tail = FALSE) * 2
   } else if (identical(alternative, "less")) {
-    my_p <- stats::pt(abs(my_t), df = my_df, lower.tail = FALSE)
-  } else if (identical(alternative, "greater")) {
     my_p <- stats::pt(abs(my_t), df = my_df, lower.tail = TRUE)
+  } else if (identical(alternative, "greater")) {
+    my_p <- stats::pt(abs(my_t), df = my_df, lower.tail = FALSE)
   }
 
   # Save test statistic, degrees of freedom, alternative hypothesis, and

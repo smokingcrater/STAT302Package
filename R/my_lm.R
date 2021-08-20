@@ -6,7 +6,7 @@
 #' @param data A data frame.
 #' @param pp A numeric specifying the scientific notation precision for the
 #'   values in the returned table.
-#' @keywords regression
+#' @keywords inference prediction
 #'
 #' @importFrom stats pt sd
 #'

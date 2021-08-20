@@ -15,6 +15,38 @@ knitr::opts_chunk$set(
 )
 ```
 
+
+# Introduction
+
+Final project for STAT 302 at UW.
+
+Install using:
+
+
+```{r, eval = FALSE}
+devtools::install_github("smokingcrater/STAT302Package")
+```
+
+
+Load the package.
+
+
 ```{r setup}
 library(STAT302Package)
 ```
+
+# my_t.test
+
+```{r}
+life_exp <- my_gapminder$lifeExp
+head(life_exp)
+```
+
+
+# my_lm
+
+# my_knn_cv
+
+# my_rf_cv
+
+# Conclusion
