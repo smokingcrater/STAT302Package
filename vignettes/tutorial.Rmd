@@ -35,7 +35,8 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r}
+```{r, setup, include = FALSE}
+library(STAT302Package)
 library(ggplot2)
 library(dplyr)
 library(kableExtra)
@@ -44,51 +45,74 @@ set.seed(617)
 
 ## **Introduction**
 
-This is Project 3, the final project STAT 302 (Statistical Computing) at the University of Washington.
+`STAT302Package` was developed as part of Project 3, the final project for STAT 302 (Statistical Computing) taught by Bryan Martin, PhD at the University of Washington.
 
-Install from GitHub using:
+`STAT302Package` is installed from GitHub using:
 
 ```{r, eval = FALSE}
 devtools::install_github("smokingcrater/STAT302Package")
 ```
 
-And then load the package as follow:
+Once installed, `STAT302Package` is loaded as follows:
 
-```{r setup}
+```{r eval = FALSE}
 library(STAT302Package)
 ```
 
-## **my_t.test()**
+`STAT302Package` is comprised of four r functions: `my_t.test()`, `my_lm()`, `my_knn_cv()`, and `my_rf_cv()`.  Each function will be discussed below.
 
-my_t.test() is a blah, blah, blah
+NOTE: Copies of the `gapminder` (from the `gapminder` package) and `penguins` (from the `palmerpenguins` package) data sets have been incorporated into `STAT302Package` and are named `my_gapminder` and `my_penguins`.
 
-Mention using gapminder data and life expectancy
+## **`my_t.test()`**
+
+`my_t.test()` performs a one sample t-test in R and offers the same essential functionality as `t.test()` (from the `stats` package).
+
+To demonstrate `my_t.test()`, we'll be analyzing life expectancy (`lifeExp`) from the `gapminder` data collection.  Prior to conducting hypothesis tests, let's review the life expectancy data.
 
 ```{r}
 summary(my_gapminder$lifeExp)
 ```
 
-In the following three hypothesis tests, the significance level (alpha) for p-value cut-off is 0.05.
+NOTE: In the following three hypothesis tests, the significance level ($\alpha$) for p-value cut-off is 0.05; in other words, $\alpha = 0.05$.
+
+**Hypothesis test 1 (two-sided/tailed t-test)**
+\begin{align}
+H_0: \mu &= 60,\\
+H_a: \mu &\neq 60.
+\end{align}
+
+The following p-value is nominally greater than $\alpha$, thus indicating weak evidence against the null hypothesis.  *Therefore we fail to reject the null hypothesis*.
 
 ```{r}
 my_t.test(my_gapminder$lifeExp, alternative = "two.sided", mu = 60)
 ```
 
-The above p-value is nominally greater than alpha, thus indicating weak evidence against the null hypothesis.  Therefore we fail to reject the null hypothesis.
+**Hypothesis test 2 (one-sided/tailed t-test)**
+\begin{align}
+H_0: \mu &= 60,\\
+H_a: \mu &< 60.
+\end{align}
+
+The following p-value is slightly less than $\alpha$, thus indicating strong evidence against the null hypothesis.  *Therefore we reject the null hypothesis*.
 
 ```{r}
 my_t.test(my_gapminder$lifeExp, alternative = "less", mu = 60)
 ```
 
-The above p-value is slightly less than alpha, thus indicating strong evidence against the null hypothesis.  Therefore we reject the null hypothesis.
+**Hypothesis test 3 (one-sided/tailed t-test)**
+\begin{align}
+H_0: \mu &= 60,\\
+H_a: \mu &> 60.
+\end{align}
+
+The following p-value is significantly greater than $\alpha$, thus indicating weak evidence against the null hypothesis.  *Therefore we fail to reject the null hypothesis*.
 
 ```{r}
 my_t.test(my_gapminder$lifeExp, alternative = "greater", mu = 60)
 ```
 
-The above p-value is significantly greater than alpha, thus indicating weak evidence against the null hypothesis.  Therefore we fail to reject the null hypothesis.
 
-## **my_lm()**
+## **`my_lm()`**
 
 my_lm() is a blah, blah, blah
 
@@ -125,24 +149,18 @@ fitted_life_exp <-
 actual_vs_fit_df <-
   data.frame(actual = my_gapminder$lifeExp,
              fitted = fitted_life_exp,
-             continent = my_gapminder$continent)
+             Continent = my_gapminder$continent)
 
 # Plot actual vs fitted values and use color to distinguish continents.
-ggplot(actual_vs_fit_df, aes(x = fitted, y = actual, col = continent)) +
+ggplot(actual_vs_fit_df, aes(x = fitted, y = actual, col = Continent)) +
   geom_point(size = 0.75) +
   geom_abline(slope = 1, intercept = 0, col = "red", lty = 2) +
   theme_bw(base_size = 10) +
-  scale_color_manual(name = "Continent",
-                     values = c("Africa" = "orange",
-                                "Americas" = "yellow",
-                                "Asia" = "green",
-                                "Europe" = "blue",
-                                "Oceania" = "pink")) +
   labs(x = "Fitted values", y = "Actual values", title = "Actual vs. Fitted") +
   theme(plot.title = element_text(hjust = 0.5, face = "bold"))
 ```
 
-## **my_knn_cv()**
+## **`my_knn_cv()`**
 
 my_knn_cv() is a blah, blah, blah
 
@@ -183,13 +201,13 @@ colnames(synopsis) <- c("# of Nearest Neighbors",
 kable_styling(kable(synopsis))
 ```
 
-## **my_rf_cv()**
+## **`my_rf_cv()`**
 
 my_rf_cv() is a blah, blah, blah
 
 ```{r}
 folds <- c(2, 5, 10)
-iterations <- 30
+iterations <- 3
 results <- matrix(nrow = length(folds), ncol = iterations)
 for (k in 1:length(folds)) {
   for (iteration in 1:iterations) {
