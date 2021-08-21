@@ -35,6 +35,13 @@ knitr::opts_chunk$set(
 )
 ```
 
+```{r}
+library(ggplot2)
+library(dplyr)
+library(kableExtra)
+set.seed(617)
+```
+
 ## **Introduction**
 
 This is Project 3, the final project STAT 302 (Statistical Computing) at the University of Washington.
@@ -45,7 +52,7 @@ Install from GitHub using:
 devtools::install_github("smokingcrater/STAT302Package")
 ```
 
-Load the package.
+And then load the package as follow:
 
 ```{r setup}
 library(STAT302Package)
@@ -121,24 +128,18 @@ actual_vs_fit_df <-
              continent = my_gapminder$continent)
 
 # Plot actual vs fitted values and use color to distinguish continents.
-ggplot2::ggplot(actual_vs_fit_df,
-                ggplot2::aes(x = fitted,
-                             y = actual,
-                             col = continent)) +
-  ggplot2::geom_point(size = 0.75) +
-  ggplot2::geom_abline(slope = 1, intercept = 0, col = "red", lty = 2) +
-  ggplot2::theme_bw(base_size = 10) +
-  ggplot2::scale_color_manual(name = "Continent",
-                             values = c("Africa" = "orange",
-                                        "Americas" = "yellow",
-                                        "Asia" = "green",
-                                        "Europe" = "blue",
-                                        "Oceania" = "pink")) +
-  ggplot2::labs(x = "Fitted values",
-                y = "Actual values",
-                title = "Actual versus Fitted") +
-  ggplot2::theme(plot.title = ggplot2::element_text(hjust = 0.5,
-                                                    face = "bold"))
+ggplot(actual_vs_fit_df, aes(x = fitted, y = actual, col = continent)) +
+  geom_point(size = 0.75) +
+  geom_abline(slope = 1, intercept = 0, col = "red", lty = 2) +
+  theme_bw(base_size = 10) +
+  scale_color_manual(name = "Continent",
+                     values = c("Africa" = "orange",
+                                "Americas" = "yellow",
+                                "Asia" = "green",
+                                "Europe" = "blue",
+                                "Oceania" = "pink")) +
+  labs(x = "Fitted values", y = "Actual values", title = "Actual vs. Fitted") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
 ```
 
 ## **my_knn_cv()**
@@ -146,6 +147,40 @@ ggplot2::ggplot(actual_vs_fit_df,
 my_knn_cv() is a blah, blah, blah
 
 ```{r}
+# Subset columns (classification = y = species, covariates = x =
+# bill_length_mm, bill_depth_mm, flipper_length_mm, and body_mass_g)
+# and eliminate NAs.
+clean_penguins <-
+  my_penguins %>%
+  select(species,
+         bill_length_mm, bill_depth_mm, flipper_length_mm, body_mass_g) %>%
+  na.omit()
+
+# Covariates (x data)..
+my_train_nn <- clean_penguins %>% select(-species)
+# Classification (y data).
+my_cl <- clean_penguins$species
+
+k <- 10
+synopsis <- data.frame(
+  "nn" = rep(NA, times =10),
+  "cv_error" = rep(NA, times = 10),
+  "training_error" = rep(NA, times = 10)
+)
+rn <- rep(NA, times = 10)
+
+for (i in 1:k) {
+  result <- my_knn_cv(train = my_train_nn, cl = my_cl, k_nn = i, k_cv = 5)
+  synopsis[i, 1] <- i
+  synopsis[i, 2] <- result$cv_err
+  synopsis[i, 3] <- mean(my_cl != result$class)
+}
+
+colnames(synopsis) <- c("# of Nearest Neighbors",
+                        "Cross Validation Misclassification Error",
+                        "Training Set Misclassification Error")
+
+kable_styling(kable(synopsis))
 ```
 
 ## **my_rf_cv()**
@@ -153,6 +188,49 @@ my_knn_cv() is a blah, blah, blah
 my_rf_cv() is a blah, blah, blah
 
 ```{r}
+folds <- c(2, 5, 10)
+iterations <- 30
+results <- matrix(nrow = length(folds), ncol = iterations)
+for (k in 1:length(folds)) {
+  for (iteration in 1:iterations) {
+    results[k, iteration] <- my_rf_cv(folds[k])
+    cat("fold", k,
+        "iteration", iteration,
+        "value", results[k, iteration],
+        "\n")
+  }
+}
+
+
+mse_df <- data.frame(k = as.factor(rep(folds, each = 30)),
+                     mse = c(results[1,], results[2,], results[3,]))
+
+ggplot(data = mse_df, aes(x = k, y = mse)) +
+  geom_boxplot(outlier.colour="red", outlier.shape=16,
+               outlier.size=2, notch=TRUE) +
+  theme_bw(base_size = 10) +
+  labs(x = "k (number of folds)",
+       y = "CV estimated MSE",
+       title = "Cross Validation MSEs") +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+
+
+synopsis <- data.frame(
+  "average" = rep(NA, times = nrow(results)),
+  "stdev" = rep(NA, times = nrow(results))
+)
+rn <- rep(NA, times = nrow(results))
+
+for (i in 1:length(folds)) {
+  synopsis[i, 1] <- mean(results[i, ])
+  synopsis[i, 2] <- sd(results[i, ])
+  rn[i] <- paste("k (number of folds) = ", folds[i])
+}
+
+rownames(synopsis) <- rn
+colnames(synopsis) <- c("Mean CV Estimate", "Standard Deviation CV Estimate")
+
+kable_styling(kable(synopsis))
 ```
 
 ## **Conclusion**
