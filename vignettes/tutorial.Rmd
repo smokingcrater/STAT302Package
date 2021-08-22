@@ -123,20 +123,9 @@ Linear regression is performed below on the `my_gapminder` data set using life e
 my_lm(formula = lifeExp ~ gdpPercap + continent, data = my_gapminder)
 ```
 
-Carefully interpret the gdpPercap coefficient blah, blah, blah
+`my_lm()` returned a summary table of the intercept and the exploratory variables.  Looking at the `gdpPercap` coefficient in this table, we see that the resulting two-sided test output is, not only less than one, it's virtually zero.  This suggests that GDP per capita impacts life expectancy far less than does the continent where one resides. 
 
-```{r}
-summary(my_gapminder$gdpPercap)
-```
-
-In the following hypothesis test, $\alpha = 0.05$.  The resulting p-value is substantially greater than $\alpha$, thus indicating weak evidence against the null hypothesis.  Therefore we fail to reject the null hypothesis.
-
-
-```{r}
-my_t.test(my_gapminder$gdpPercap, alternative = "two.sided", mu = 7215.3)
-```
-
-The following scatterplot illustrates the relationship between the actual and fitted values: blah, blah, blah
+The following scatterplot illustrates the relationship between the actual and fitted values and includes a best fit (regression) line.  The plot suggests non-conclusive model fit since it's both a good fit in some cases (e.g.; Europe, where both the predicted and the actual life expectancies lie in the general range of low 70s to low 80s) while a suboptimal fit for others (e.g; Africa, where the predicted range is from the high 40s to high 50s though the actual range is from the mid 30s to the mid 70s).
 
 ```{r}
 # To obtain fitted values, multiply X %*% beta where:
@@ -194,7 +183,7 @@ synopsis <- data.frame(
   "training_error" = rep(NA, times = 10)
 )
 
-# Successively apply nearest neighbor algorithm using cross-validatio for
+# Successively apply nearest neighbor algorithm using cross-validation for
 # 1 to k (in this case, 10) neighbors.
 for (i in 1:k) {
   result <- my_knn_cv(train = my_train_nn, cl = my_cl, k_nn = i, k_cv = 5)
@@ -204,7 +193,7 @@ for (i in 1:k) {
 }
 ```
 
-Both the training misclassification rates (no cross-validation) and the cross-validation misclassification rates for the successive calls (1 to 10 neighbors) are documented in the following table:
+Both the cross-validation misclassification rates and the training misclassification rates (no cross-validation) for the successive calls (1 to 10 neighbors) are documented in the following table:
 
 ```{r}
 colnames(synopsis) <- c("# of Nearest Neighbors",
@@ -215,9 +204,13 @@ mes <- kable_styling(kable(synopsis))
 mes
 ```
 
-In theory, though I would choose model 1 (1 neighbor) based on the training misclassification rates since it returns the lowest error.  Likewise, I would choose model 1 (1 neighbor) based on the training missclassification rates since it's 0.
+In theory, based solely on the above results, I'd choose cross-validation model 1 (1 neighbor) based on the cross-validation misclassification rates since it has the lowest cross-validation misclassification error.  Likewise, I'd choose training model 1 (1 neighbor) based on the training misclassification rates since its misclassification error is 0.
 
-In practice, however, taking into account both the blah, blah, blah
+As discussed in the STAT302 Statistical Prediction lectures, it's fairly straightforward to fit a model with low variance / high bias or with high variance / low bias but such models run the risk of being overfitted to the training data.
+
+Cross-validation is a simple concept in which the training data set is split into multiple (k) parts (folds).  All but one of the folds is used to train the model/method while the remaining fold is used to make predictions.  This process is repeated until all of the folds have been utilized to both train and predict.  By employing cross-validation, we're able to build a model utilizing the full data set while evaluating the model's performance on out-of-sample data.  It's important to remember that cross-validation is used to compare and choose between multiple predictive models by analyzing their cross-validation miscalculation errors.
+
+So, in practice, I'd likely use cross-validation with a k value of 5-10 to analyze models and choose the appropriate predictive model based on the lowest cross-validation miscalculation errors.
 
 ## **`my_rf_cv()`**
 
@@ -229,29 +222,35 @@ Below we predict body mass (`body_mass_g`) (classification = y) using three char
 # Cross-validation fold counts.
 folds <- c(2, 5, 10)
 # Number of simulations to run for each fold count.
-iterations <- 3
+iterations <- 30
 # Matrix to gather results for table.
-results <- matrix(nrow = length(folds), ncol = iterations)
+results <- matrix(nrow = iterations, ncol = length(folds))
 # Successively apply random forest algorithm using cross-validation for
 # each fold count specified..
 for (k in 1:length(folds)) {
   for (iteration in 1:iterations) {
-    results[k, iteration] <- my_rf_cv(folds[k])
+    # tmp <- my_rf_cv(folds[k])
+    # cat("results[", iteration, ", ", k, "]: ", tmp, "\n")
+    results[iteration, k] <- my_rf_cv(folds[k])
   }
 }
 ```
 
-The resulting cross-validation mean squared errors (MSEs) for each fold count (`k`) are depicted in the following boxplots:
+The resulting cross-validation estimated mean squared errors (MSEs) for each fold count (`k`) are depicted in the following boxplots (outliers in solid grey circles):
 
 ```{r}
 # Convert from matrix to data.frame for ggplot2.
-mse_df <- data.frame(k = as.factor(rep(folds, each = 30)),
-                     mse = c(results[1,], results[2,], results[3,]))
+mse_df <- data.frame(k = as.factor(rep(folds, each = iterations)),
+                     mse = c(results[, 1], results[, 2], results[, 3]))
 
 # Generate a boxplot for each fold count.
-cvmse <- ggplot(data = mse_df, aes(x = k, y = mse)) +
-  geom_boxplot(outlier.colour="red", outlier.shape=16,
-               outlier.size=2, notch=TRUE) +
+cvmse <- ggplot(data = mse_df, aes(x = k, y = mse, color = k)) +
+  geom_boxplot(outlier.colour = "grey68",
+               outlier.shape = 16,
+               outlier.size = 2,
+               notch = TRUE) +
+  geom_jitter(shape = 2, position = position_jitter(0.2)) +
+  scale_color_manual(values =c ("darkorange1", "seagreen1", "royalblue1")) +
   theme_bw(base_size = 10) +
   labs(x = "k (number of folds)",
        y = "CV estimated MSE",
@@ -260,20 +259,20 @@ cvmse <- ggplot(data = mse_df, aes(x = k, y = mse)) +
 cvmse
 ```
 
-The resulting mean and standard deviation of the cross-validation estimates for each fold count (`k`) are presented below:
+The resulting mean and standard deviation of the cross-validation estimated MSEs for each fold count (`k`) are presented below:
 
 ```{r}
 # Convert from matrix to data.frame for kable table.
 synopsis <- data.frame(
-  "average" = rep(NA, times = nrow(results)),
-  "stdev" = rep(NA, times = nrow(results))
+  "average" = rep(NA, times = ncol(results)),
+  "stdev" = rep(NA, times = ncol(results))
 )
-rn <- rep(NA, times = nrow(results))
+rn <- rep(NA, times = ncol(results))
 
 # Display mean and standard deviation for each fold.
 for (i in 1:length(folds)) {
-  synopsis[i, 1] <- mean(results[i, ])
-  synopsis[i, 2] <- sd(results[i, ])
+  synopsis[i, 1] <- mean(results[, i])
+  synopsis[i, 2] <- sd(results[, i])
   rn[i] <- paste("k (number of folds) = ", folds[i])
 }
 
@@ -285,5 +284,4 @@ cves <- kable_styling(kable(synopsis))
 cves
 ```
 
-The boxplots and table blah, blah, blah
-
+The above boxplots depict the cross-validation estimated MSEs visually while the above table depicts said data textually.  They both suggest that as the number of cross-validation folds increases, both the mean and standard deviations of the cross-validation MSEs, which is what I'd expect.
