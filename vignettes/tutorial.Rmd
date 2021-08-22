@@ -63,11 +63,12 @@ library(STAT302Package)
 
 NOTE: Copies of the `gapminder` (from the `gapminder` package) and `penguins` (from the `palmerpenguins` package) data sets have been incorporated into `STAT302Package` and are named `my_gapminder` and `my_penguins`.
 
+
 ## **`my_t.test()`**
 
 `my_t.test()` performs a one sample t-test in R and offers the same essential functionality as `t.test()` (from the `stats` package).
 
-To demonstrate `my_t.test()`, we'll be analyzing life expectancy (`lifeExp`) from the `gapminder` data collection.  Prior to conducting hypothesis tests, let's review the life expectancy data.
+To demonstrate `my_t.test()`, we'll be analyzing life expectancy (`lifeExp`) from the `my_gapminder` data set  Prior to conducting hypothesis tests, let's review the life expectancy data.
 
 ```{r}
 summary(my_gapminder$lifeExp)
@@ -114,13 +115,13 @@ my_t.test(my_gapminder$lifeExp, alternative = "greater", mu = 60)
 
 ## **`my_lm()`**
 
-my_lm() is a blah, blah, blah
+`my_lm()` fits a linear model in R and offers the same essential functionality as `lm()` (from the `stats` package).
+
+Linear regression is performed below on the `my_gapminder` data set using life expectancy (`lifeExp` {see `my_t.test()` above for a review of `lifeExp`}) as the response variable (y) and per capita GDP (`gdpPercap`) and continent (`continent`) as the exploratory variables (x).
 
 ```{r}
 my_lm(formula = lifeExp ~ gdpPercap + continent, data = my_gapminder)
 ```
-
-Linear regression was performed on the gapminder data set using lifeExp as the response variable (y) and gdpPercap and continent as the exploratory variables (x)
 
 Carefully interpret the gdpPercap coefficient blah, blah, blah
 
@@ -128,13 +129,14 @@ Carefully interpret the gdpPercap coefficient blah, blah, blah
 summary(my_gapminder$gdpPercap)
 ```
 
-In the following hypothesis test, the significance level (alpha) for p-value cut-off is 0.05.
+In the following hypothesis test, $\alpha = 0.05$.  The resulting p-value is substantially greater than $\alpha$, thus indicating weak evidence against the null hypothesis.  Therefore we fail to reject the null hypothesis.
+
 
 ```{r}
 my_t.test(my_gapminder$gdpPercap, alternative = "two.sided", mu = 7215.3)
 ```
 
-The above p-value is substantially greater than alpha, thus indicating weak evidence against the null hypothesis.  Therefore we fail to reject the null hypothesis.
+The following scatterplot illustrates the relationship between the actual and fitted values: blah, blah, blah
 
 ```{r}
 # To obtain fitted values, multiply X %*% beta where:
@@ -152,17 +154,21 @@ actual_vs_fit_df <-
              Continent = my_gapminder$continent)
 
 # Plot actual vs fitted values and use color to distinguish continents.
-ggplot(actual_vs_fit_df, aes(x = fitted, y = actual, col = Continent)) +
+avf <- ggplot(actual_vs_fit_df, aes(x = fitted, y = actual, col = Continent)) +
   geom_point(size = 0.75) +
   geom_abline(slope = 1, intercept = 0, col = "red", lty = 2) +
   theme_bw(base_size = 10) +
   labs(x = "Fitted values", y = "Actual values", title = "Actual vs. Fitted") +
   theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+avf
 ```
+
 
 ## **`my_knn_cv()`**
 
-my_knn_cv() is a blah, blah, blah
+`my_knn_cv()` applies cross-validation to a nearest neighbor algorithm (`knn()` from the `class` package).
+
+The following example predicts the penguin species (`species`) (classification = y) using four characteristics (covariates = x): bill length (`bill_length_mm`), bill depth (`bill_depth_mm`), flipper length (`flipper_length_mm`) and body mass (`body_mass_g`).  5-fold cross-validation is applied to the nearest neighbor algorithm 10 times (starting with one neighbor and successively incrementing to ten neighbors).
 
 ```{r}
 # Subset columns (classification = y = species, covariates = x =
@@ -179,51 +185,71 @@ my_train_nn <- clean_penguins %>% select(-species)
 # Classification (y data).
 my_cl <- clean_penguins$species
 
+# Maximum of 10 nearest neighbors.
 k <- 10
+# Data frame to gather results for table.
 synopsis <- data.frame(
   "nn" = rep(NA, times =10),
   "cv_error" = rep(NA, times = 10),
   "training_error" = rep(NA, times = 10)
 )
-rn <- rep(NA, times = 10)
 
+# Successively apply nearest neighbor algorithm using cross-validatio for
+# 1 to k (in this case, 10) neighbors.
 for (i in 1:k) {
   result <- my_knn_cv(train = my_train_nn, cl = my_cl, k_nn = i, k_cv = 5)
   synopsis[i, 1] <- i
   synopsis[i, 2] <- result$cv_err
   synopsis[i, 3] <- mean(my_cl != result$class)
 }
+```
 
+Both the training misclassification rates (no cross-validation) and the cross-validation misclassification rates for the successive calls (1 to 10 neighbors) are documented in the following table:
+
+```{r}
 colnames(synopsis) <- c("# of Nearest Neighbors",
-                        "Cross Validation Misclassification Error",
+                        "Cross-Validation Misclassification Error",
                         "Training Set Misclassification Error")
 
-kable_styling(kable(synopsis))
+mes <- kable_styling(kable(synopsis))
+mes
 ```
+
+In theory, though I would choose model 1 (1 neighbor) based on the training misclassification rates since it returns the lowest error.  Likewise, I would choose model 1 (1 neighbor) based on the training missclassification rates since it's 0.
+
+In practice, however, taking into account both the blah, blah, blah
 
 ## **`my_rf_cv()`**
 
-my_rf_cv() is a blah, blah, blah
+`my_rf_cv()` applies cross-validation to a random forest algorithm (`randomForest()` from the `randomForest` package).  This function is hard-wired to work solely on the `my_penguins` data set; the only meaningful parameter (an additional `feedback` parameter exists solely for debugging) is `k` which represents the desired number of cross-validation folds.
+
+Below we predict body mass (`body_mass_g`) (classification = y) using three characteristics (covariates = x): bill length (`bill_length_mm`), bill depth (`bill_depth_mm`), and flipper length (`flipper_length_mm`).  Cross-validation is applied using fold counts of 2, 5, and finally 10 to the random forest algorithm, 30 times per each of the three specified fold counts.
 
 ```{r}
+# Cross-validation fold counts.
 folds <- c(2, 5, 10)
+# Number of simulations to run for each fold count.
 iterations <- 3
+# Matrix to gather results for table.
 results <- matrix(nrow = length(folds), ncol = iterations)
+# Successively apply random forest algorithm using cross-validation for
+# each fold count specified..
 for (k in 1:length(folds)) {
   for (iteration in 1:iterations) {
     results[k, iteration] <- my_rf_cv(folds[k])
-    cat("fold", k,
-        "iteration", iteration,
-        "value", results[k, iteration],
-        "\n")
   }
 }
+```
 
+The resulting cross-validation mean squared errors (MSEs) for each fold count (`k`) are depicted in the following boxplots:
 
+```{r}
+# Convert from matrix to data.frame for ggplot2.
 mse_df <- data.frame(k = as.factor(rep(folds, each = 30)),
                      mse = c(results[1,], results[2,], results[3,]))
 
-ggplot(data = mse_df, aes(x = k, y = mse)) +
+# Generate a boxplot for each fold count.
+cvmse <- ggplot(data = mse_df, aes(x = k, y = mse)) +
   geom_boxplot(outlier.colour="red", outlier.shape=16,
                outlier.size=2, notch=TRUE) +
   theme_bw(base_size = 10) +
@@ -231,26 +257,33 @@ ggplot(data = mse_df, aes(x = k, y = mse)) +
        y = "CV estimated MSE",
        title = "Cross Validation MSEs") +
   theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+cvmse
+```
 
+The resulting mean and standard deviation of the cross-validation estimates for each fold count (`k`) are presented below:
 
+```{r}
+# Convert from matrix to data.frame for kable table.
 synopsis <- data.frame(
   "average" = rep(NA, times = nrow(results)),
   "stdev" = rep(NA, times = nrow(results))
 )
 rn <- rep(NA, times = nrow(results))
 
+# Display mean and standard deviation for each fold.
 for (i in 1:length(folds)) {
   synopsis[i, 1] <- mean(results[i, ])
   synopsis[i, 2] <- sd(results[i, ])
   rn[i] <- paste("k (number of folds) = ", folds[i])
 }
 
+# Label table.
 rownames(synopsis) <- rn
 colnames(synopsis) <- c("Mean CV Estimate", "Standard Deviation CV Estimate")
 
-kable_styling(kable(synopsis))
+cves <- kable_styling(kable(synopsis))
+cves
 ```
 
-## **Conclusion**
+The boxplots and table blah, blah, blah
 
-In summary, blah, blah, blah
